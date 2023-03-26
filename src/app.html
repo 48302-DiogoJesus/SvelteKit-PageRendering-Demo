@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+	<meta name="viewport" content="width=device-width" />
+	%sveltekit.head%
+</head>
+
+<body>
+	<div style="display: flex; justify-content: center;">
+		<div style="border:3px solid yellowgreen">
+			<h2 style="margin-bottom:5px;margin-top:0; text-align:center">NETWORK REQUESTS</h2>
+			<ul style="margin:0" class="network-viewer-list">
+			</ul>
+		</div>
+
+		<div style="display:flex;flex-direction: column; align-items:center;">
+			<div style="border:3px solid green">
+				<div style="display:flex;flex-direction:column">
+					<div id="links"
+						style="margin:10px;display: flex; gap:15px; justify-content: center;font-size:1.15rem; font-weight: bolder;">
+						<a href="/csr" onClick="(e) => document.changePath()">Client Side Rendering</a>
+						<br />
+						<a href="/ssr" onClick="(e) => document.changePath()">Server Side Rendering</a>
+						<br />
+						<a href="/ssr+csr" onClick="(e) => document.changePath()">Server Side Rendering + Client Side
+							Rendering(hydration)</a>
+						<br />
+						<a href="/prerender" onClick="(e) => document.changePath()">Pre-Render</a>
+						<br />
+						<a href="/prerender+csr" onClick="(e) => document.changePath()">Pre-Render + Client Side Rendering</a>
+					</div>
+
+					<p>Note: When prerender=true ssr value is always false</p>
+
+					<hr style="width:100%" />
+
+					<ul style="margin:0;">
+						<li>
+							<strong>Pre-render</strong>: Render the document + page at
+							<strong>build time</strong>
+						</li>
+						<li>
+							<strong>Server-Side-Rendering</strong>: Render the document + page at
+							<strong>request time</strong>
+						</li>
+						<li>
+							<strong> Client-Side-Rendering</strong>: Client will render the page
+							and place it's output inside the document it received
+						</li>
+						<li>
+							These render combinations only apply if the 1st request is to the page
+							in question. After the 1st request <strong>to a page with CSR=true</strong> all subsequent page
+							navigations are client side routing + client side
+							rendering
+						</li>
+					</ul>
+
+				</div>
+			</div>
+
+			<div style="display:flex; flex-direction: column; align-items: center;">
+				<h1 style="font-size:2.2rem; margin:3px">PAGE</h1>
+				<p id="load-called-msg" style="text-align:center; margin:3px"></p>
+			</div>
+			<hr />
+
+			<div id="current-page" style="border: 3px solid burlywood; width:100%; text-align:center">
+				%sveltekit.body%
+			</div>
+		</div>
+	</div>
+</body>
+
+<script>
+	if (typeof window !== undefined) {
+		const networkViewerListElem = document.querySelector(".network-viewer-list")
+		const loadCalledElem = document.querySelector("#load-called-msg")
+
+		document.addEventListener("loadCalled", () => {
+			const loadTime = document.querySelector("#load-time")?.innerText
+			if (loadTime)
+				loadCalledElem.innerText = "(Client just called load function! Prev time was: " + loadTime + ")"
+			else
+				loadCalledElem.innerText = "(Client just called load function!)"
+		})
+
+		document.addEventListener("pathchanged", () => {
+			networkViewerListElem.innerText = ""
+
+			const currentPageElem = document.querySelector("#current-page")
+			currentPageElem.querySelector("h1").innerText = ""
+			currentPageElem.querySelector("p").innerText = ""
+			loadCalledElem.innerText = ""
+		})
+
+		const pathChangedEvent = new CustomEvent("pathchanged")
+		document.changePath = () => document.dispatchEvent(pathChangedEvent)
+
+		new PerformanceObserver((list) => {
+			const entries = list.getEntries();
+			for (const entry of entries) {
+				if (entry.entryType === 'resource') {
+					const elem = document.createElement("li")
+					const segments = entry.name.split('/');
+					const lastSegment = segments[segments.length - 1];
+					elem.innerText = lastSegment
+
+					networkViewerListElem.appendChild(elem)
+				}
+			}
+		}).observe({ entryTypes: ['resource'] });
+	}
+</script>
+
+</html>
