@@ -63,7 +63,9 @@
 
 			<div style="display:flex; flex-direction: column; align-items: center;">
 				<h1 style="font-size:2.2rem; margin:3px">PAGE</h1>
-				<p id="load-called-msg" style="text-align:center; margin:3px"></p>
+				<p id="load-called-msg" style="text-align:center; margin:3px">
+					No client calls to load function yet
+				</p>
 			</div>
 			<hr />
 
@@ -81,6 +83,7 @@
 
 		document.addEventListener("pathchanged", () => {
 			networkViewerListElem.innerText = ""
+			loadCalledElem.innerText = "No client calls to load function yet"
 
 			const currentPageElem = document.querySelector("#current-page")
 
@@ -94,9 +97,9 @@
 		document.addEventListener("loadCalled", () => {
 			const prevLoadTime = document.querySelector("#load-time")?.innerText
 			if (prevLoadTime)
-				loadCalledElem.innerText = "(Client just called load function! Server time was: " + prevLoadTime + ")"
+				loadCalledElem.innerText = "(Client called load function. Waiting for result. Server rendered " + prevLoadTime + ")"
 			else
-				loadCalledElem.innerText = "(Client just called load function!)"
+				loadCalledElem.innerText = "(Client called load function. Waiting for result)"
 		})
 
 		const pathChangedEvent = new CustomEvent("pathchanged")
