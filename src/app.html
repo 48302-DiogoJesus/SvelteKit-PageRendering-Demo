@@ -21,16 +21,16 @@
 				<div style="display:flex;flex-direction:column">
 					<div id="links"
 						style="margin:10px;display: flex; gap:15px; justify-content: center;font-size:1.15rem; font-weight: bolder;">
-						<a href="/csr" onClick="(e) => document.changePath()">Client Side Rendering</a>
+						<a href="/csr" onClick="document.changePath()">Client Side Rendering</a>
 						<br />
-						<a href="/ssr" onClick="(e) => document.changePath()">Server Side Rendering</a>
+						<a href="/ssr" onClick="document.changePath()">Server Side Rendering</a>
 						<br />
-						<a href="/ssr+csr" onClick="(e) => document.changePath()">Server Side Rendering + Client Side
+						<a href="/ssr+csr" onClick="document.changePath()">Server Side Rendering + Client Side
 							Rendering(hydration)</a>
 						<br />
-						<a href="/prerender" onClick="(e) => document.changePath()">Pre-Render</a>
+						<a href="/prerender" onClick="document.changePath()">Pre-Render</a>
 						<br />
-						<a href="/prerender+csr" onClick="(e) => document.changePath()">Pre-Render + Client Side Rendering</a>
+						<a href="/prerender+csr" onClick="document.changePath()">Pre-Render + Client Side Rendering</a>
 					</div>
 
 					<p>Note: When prerender=true ssr value is always false</p>
@@ -79,21 +79,24 @@
 		const networkViewerListElem = document.querySelector(".network-viewer-list")
 		const loadCalledElem = document.querySelector("#load-called-msg")
 
-		document.addEventListener("loadCalled", () => {
-			const loadTime = document.querySelector("#load-time")?.innerText
-			if (loadTime)
-				loadCalledElem.innerText = "(Client just called load function! Prev time was: " + loadTime + ")"
-			else
-				loadCalledElem.innerText = "(Client just called load function!)"
-		})
-
 		document.addEventListener("pathchanged", () => {
 			networkViewerListElem.innerText = ""
 
 			const currentPageElem = document.querySelector("#current-page")
-			currentPageElem.querySelector("h1").innerText = ""
-			currentPageElem.querySelector("p").innerText = ""
-			loadCalledElem.innerText = ""
+
+			// Clear PAGE contents while time is not calculated yet
+			const headerElem = currentPageElem.querySelector("h1")
+			if (headerElem) headerElem.remove()
+			const timeElem = currentPageElem.querySelector("#load-time")
+			if (timeElem) timeElem.remove()
+		})
+
+		document.addEventListener("loadCalled", () => {
+			const prevLoadTime = document.querySelector("#load-time")?.innerText
+			if (prevLoadTime)
+				loadCalledElem.innerText = "(Client just called load function! Server time was: " + prevLoadTime + ")"
+			else
+				loadCalledElem.innerText = "(Client just called load function!)"
 		})
 
 		const pathChangedEvent = new CustomEvent("pathchanged")
